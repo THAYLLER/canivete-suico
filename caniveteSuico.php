@@ -1,6 +1,4 @@
 <?php
-
-
 class caniveteSuico
 {
     private $string;
