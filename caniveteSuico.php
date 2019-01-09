@@ -1,11 +1,24 @@
 <?php
-
 class caniveteSuico
 {
     private $string;
     private $conteudo;
     private $tipo;
     private $qt;
+    private $diretorio;
+    private $file;
+    private $tp;
+
+    function __construct()
+    {
+        $this->string = "";
+        $this->conteudo = "";
+        $this->tipo = "";
+        $this->qt = 0;
+        $this->diretorio = "";
+        $this->file = "";
+        $this->tp = 1;
+    }
 
     public function __set($atrib, $value){
         $this->$atrib = $value;
@@ -24,22 +37,21 @@ class caniveteSuico
         if ($this->qt) {
             $this->conteudo = $this->left($this->conteudo, $this->qt);
         }
-        //limita qt de caracteres
-        //$conteudo = utf8_encode($conteudo); //coloca no formato UTF-8
-        $this->conteudo = trim($this->conteudo); //Retira espaço no ínicio e final da string
+
+        $this->conteudo = trim($this->conteudo);
         if ($this->tipo == 'inverte') {
             $this->conteudo = stripslashes($this->conteudo);
         } else {
-            //funcao nao esta ativada
+
             if (!get_magic_quotes_gpc()) {
                 $this->conteudo = addslashes($this->conteudo);
             }
-            //Retorna a string com escapes (\)
+
         }
         if ($this->tipo != "texto") {
             $this->conteudo = strip_tags($this->conteudo);
         }
-        //Retira as tags HTML e PHP de uma string
+
         if ($this->tipo == "padrao") {
         } elseif ($this->tipo == "decimal") {
             $this->conteudo = strtr($this->conteudo, ".", "");
@@ -59,25 +71,30 @@ class caniveteSuico
             $this->conteudo = $this->right($this->conteudo, 4) . "-" . $this->left($this->right($this->conteudo, 6), 2) . "-" . $this->left($this->conteudo, 2);
         } elseif ($tipo == "forma_data2") {
             $this->conteudo = $this->right($this->conteudo, 2) . "-" . $this->left($this->right($this->conteudo, 6), 2) . "-" . $this->left($this->conteudo, 4);
-            // coloca pontos e traços no CPF
+
         } elseif ($this->tipo == "cpf") {
             $this->conteudo = $this->left($this->conteudo, 3) . "." . substr($this->conteudo, 3, 3) . "." . substr($this->conteudo, 6, 3) . "-" . $this->right($this->conteudo, 2);
         } elseif ($this->tipo == "email") {
-            //testa email
+
             if (eregi("^([a-zA-Z0-9.-_])*([@])([a-z0-9]).([a-z]{2,3})", $this->conteudo)) {
                 $this->conteudo = 1;
             }
 
-            //retira qualquer caracter que não seja numero
+
         } elseif ($this->tipo == "digitos") {
             $this->conteudo = str_replace("/", "", $this->conteudo);
             $this->conteudo = str_replace(",", "", $this->conteudo);
             $this->conteudo = str_replace(".", "", $this->conteudo);
-            $this->conteudo = str_replace("_", "", $this->conteudo); //retira caractere - (traços)
-            $this->conteudo = str_replace("-", "", $this->conteudo); //retira caractere - (traços)
-            $this->conteudo = str_replace("(", "", $this->conteudo); //retira abre parenteses
-            $this->conteudo = str_replace(")", "", $this->conteudo); //retira fecha parenteses
-            $this->conteudo = str_replace(" ", "", $this->conteudo); //retira espaços
+            $this->conteudo = str_replace("_", "", $this->conte
+
+            $this->conteudo = str_replace("-", "", $this->conte
+
+            $this->conteudo = str_replace("(", "", $this->conte
+
+            $this->conteudo = str_replace(")", "", $this->conteu
+
+            $this->conteudo = str_replace(" ", "", $this->conte
+
         }
         return $this->conteudo;
     }
@@ -87,14 +104,14 @@ class caniveteSuico
         }
         return $strData;
     }
-    // recebe a data no formato aaaa-mm-dd e converte a para dd/mm/aaaa
+
     private function cData2($strData) {
         if (preg_match("#/#", $strData) == 1) {
             $strData = implode('-', array_reverse(explode('/', $strData)));
         }
         return $strData;
     }
-    // recebe dataHora no formato do banco de dados mysql e converte no formato normal
+
     private function cDataHora1($strData) {
         if (preg_match("#-#", $strData) == 1) {
             $strData2 = implode('/', array_reverse(explode('-', left($strData, 10))));
@@ -102,7 +119,7 @@ class caniveteSuico
         }
         return $strData;
     }
-    // converte data e hora em formato para o banco de dados mysql
+
     private function cDataHora2($strData) {
         if (preg_match("#/#", $strData) == 1) {
             $strData2 = implode('-', array_reverse(explode('/', $this->left($strData, 10))));
@@ -111,7 +128,6 @@ class caniveteSuico
         return $strData;
     }
 
-    ///////////////////////////////////////
     private function right($value, $count) {
         $value = substr($value, (strlen($value) - $count), strlen($value));
         return $value;
@@ -119,4 +135,34 @@ class caniveteSuico
     private function left($string, $count) {
         return substr($string, 0, $count);
     }
+    public function DeletarArquivo() {
+        if ($this->file != "") {
+            if (file_exists($this->diretorio . $this->file)) {
+                unlink($this->diretorio . $this->file);
+                return "Arquivo excluído com sucesso";
+            }
+            else
+                return "Arquivo e ou diretório não encontrado";
+        }
+    }
+
+    public function fdecimal() {
+        if ($this->conteudo == '') {
+            $this->conteudo = 0;
+        }else {
+
+            if ($this->tp == 1) {
+                $this->conteudo = number_format((float)$this->conteudo, $this->qt, ',', '.');
+            } elseif ($tp == 3) {
+                $this->conteudo = number_format((float)$this->conteudo, $this->qt, '.', '');
+            } elseif ($this->tp == 4) {
+
+                $this->conteudo = number_format((float)$this->conteudo, $this->qt, '', '');
+            } else {
+                $this->conteudo = left($this->conteudo, strlen($this->conteudo) - $this->qt) . "," . right($this->conteudo, $this->qt);
+            }
+        }
+        return $this->conteudo;
+    }
 }
+
